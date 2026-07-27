@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="az">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Seriyalar - Eclipstoon</title>
+    <link rel="icon" href="logo_2.webp" type="image/webp">
+    <style>
+        :root {
+            --bg-color: #0d0f18;
+            --sidebar-bg: #131726;
+            --text-color: #94a3b8;
+            --text-active: #f8fafc;
+            --card-bg: #161b2e;
+            --accent-color: #8b5cf6;
+            --accent-gradient: linear-gradient(135deg, #a855f7, #6366f1);
+        }
+        body {
+            margin: 0; padding: 0; background: var(--bg-color); color: var(--text-color); font-family: Arial, sans-serif;
+        }
+        .top-navbar {
+            display: flex; justify-content: space-between; align-items: center; padding: 10px 15px;
+            background-color: var(--sidebar-bg); border-bottom: 1px solid rgba(255,255,255,0.05); position: sticky; top: 0; z-index: 999;
+        }
+        .nav-left { display: flex; align-items: center; gap: 10px; }
+        .header-logo { max-width: 45px; border-radius: 50%; }
+        .sub-navbar {
+            display: flex; gap: 20px; padding: 10px 15px; background-color: rgba(19, 23, 38, 0.6);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+        }
+        .sub-navbar a { color: var(--text-active); text-decoration: none; font-weight: bold; font-size: 13px; }
+        .sub-navbar a:hover, .sub-navbar a.active { color: var(--accent-color); }
+        .main-content { padding: 20px; max-width: 900px; margin: 0 auto; }
+        h2 { color: var(--text-active); }
+        .series-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 15px; margin-top: 20px; }
+        .series-card { background: var(--card-bg); border-radius: 12px; overflow: hidden; border: 1px solid rgba(255,255,255,0.05); padding: 10px; text-align: center; }
+        .series-thumb { width: 100%; height: 220px; background: #2d1b4e; border-radius: 8px; object-fit: cover; }
+        .series-card h4 { margin: 10px 0 5px 0; color: var(--text-active); font-size: 14px; }
+        .series-card a { display: inline-block; margin-top: 5px; background: var(--accent-gradient); color: white; padding: 5px 12px; border-radius: 6px; text-decoration: none; font-size: 12px; font-weight: bold; }
+    </style>
+</head>
+<body>
+    <div class="top-navbar">
+        <div class="nav-left">
+            <a href="index.html"><img src="logo_2.webp" alt="Eclipstoon" class="header-logo"></a>
+        </div>
+    </div>
+    <div class="sub-navbar">
+        <a href="index.html">ANA SƏHİFƏ</a>
+        <a href="seriyalar.html" class="active">SERİYALAR</a>
+    </div>
+    <div class="main-content">
+        <h2>Bütün Seriyalar</h2>
+        <div class="series-grid">
+            <div class="series-card">
+                <div class="series-thumb" style="background: linear-gradient(45deg, #1f293d, #2d1b4e);"></div>
+                <h4>Jinx</h4>
+                <a href="bolum.html">Oxu</a>
+            </div>
+            <div class="series-card">
+                <div class="series-thumb" style="background: linear-gradient(45deg, #3b2d1b, #4e1b38);"></div>
+                <h4>Codename Anastasia</h4>
+                <a href="bolum.html">Oxu</a>
+            </div>
+            <div class="series-card">
+                <div class="series-thumb" style="background: linear-gradient(45deg, #1b3d36, #1b274e);"></div>
+                <h4>Desire me if you can</h4>
+                <a href="bolum.html">Oxu</a>
+            </div>
+            <div class="series-card">
+                <div class="series-thumb" style="background: linear-gradient(45deg, #2d1b1b, #1b304e);"></div>
+                <h4>The Ghost’s Nocturne</h4>
+                <a href="bolum.html">Oxu</a>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
