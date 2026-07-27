@@ -2,7 +2,7 @@
 <html lang="az">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Eclipstoon</title>
     <link rel="icon" href="logo.webp" type="image/webp">
     <style>
@@ -34,7 +34,6 @@
             position: relative; min-height: 100vh;
         }
 
-        /* Hərəkətli Lotus Ləçəkləri Arxa Fon Effekti */
         .petals-container {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
             pointer-events: none; overflow: hidden; z-index: 1;
@@ -51,7 +50,6 @@
 
         .modal, .top-navbar, .sub-navbar, .sidebar, .main-content, .back-to-top, .sidebar-overlay { position: relative; z-index: 2; }
 
-        /* Sidebar Overlay (Kənara toxunduqda bağlanması üçün) */
         .sidebar-overlay {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
             background: rgba(0,0,0,0.5); visibility: hidden; opacity: 0; transition: 0.3s; z-index: 999;
@@ -67,12 +65,19 @@
         .modal-content {
             background: var(--card-bg); padding: 25px; border-radius: 16px; text-align: center; max-width: 400px; width: 100%;
             box-shadow: 0 10px 30px rgba(0,0,0,0.5); border: 1px solid rgba(139, 92, 246, 0.2);
+            max-height: 90vh; overflow-y: auto;
         }
         .modal-content h2 { color: var(--text-active); margin-top: 0; }
-        .modal-content input {
+        .modal-content input, .modal-content select {
             width: 100%; padding: 10px; margin: 10px 0; background: rgba(255,255,255,0.04);
             border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; color: var(--text-active); outline: none;
         }
+        .file-upload-label {
+            display: block; width: 100%; padding: 10px; margin: 10px 0; background: rgba(255,255,255,0.04);
+            border: 1px dashed rgba(139, 92, 246, 0.5); border-radius: 8px; color: var(--text-active); text-align: center; cursor: pointer; font-size: 13px;
+        }
+        .file-upload-label:hover { background: rgba(139, 92, 246, 0.1); }
+        
         .modal-btn {
             width: 100%; padding: 10px; border: none; border-radius: 8px; font-weight: bold; cursor: pointer;
             background: var(--accent-gradient); color: white; margin-top: 10px; transition: opacity 0.2s;
@@ -92,13 +97,13 @@
         }
         .nav-left, .nav-right { display: flex; align-items: center; gap: 10px; }
         
-        /* Qrafik loqotip qutusu və daxili SVG */
+        /* Loqo ölçüsü səliqəli hala gətirildi */
         .header-logo-wrapper {
-            width: 40px; height: 40px; border-radius: 50%; background: var(--accent-gradient);
+            width: 45px; height: 45px; border-radius: 50%; background: var(--accent-gradient);
             display: flex; align-items: center; justify-content: center; overflow: hidden; border: 1px solid rgba(255,255,255,0.2);
-            color: white; font-weight: bold; font-size: 18px; text-decoration: none;
+            text-decoration: none; flex-shrink: 0;
         }
-        .header-logo-wrapper svg { width: 24px; height: 24px; fill: white; }
+        .header-logo-wrapper img { width: 100%; height: 100%; object-fit: cover; }
         
         .menu-toggle-btn { background: none; border: none; cursor: pointer; display: flex; flex-direction: column; gap: 5px; padding: 5px; }
         .menu-toggle-btn span { width: 22px; height: 3px; background-color: var(--text-active); border-radius: 2px; transition: 0.3s; }
@@ -147,7 +152,8 @@
         .profile-box {
             display: flex; align-items: center; gap: 12px; margin-bottom: 20px;
         }
-        .profile-avatar { width: 45px; height: 45px; border-radius: 50%; object-fit: cover; background: var(--accent-gradient); display: flex; align-items: center; justify-content: center; color: white; font-weight: bold; font-size: 18px; }
+        .profile-avatar { width: 45px; height: 45px; border-radius: 50%; object-fit: cover; background: var(--accent-gradient); display: flex; align-items: center; justify-content: center; color: white; font-weight: bold; font-size: 18px; overflow: hidden; flex-shrink: 0; }
+        .profile-avatar img { width: 100%; height: 100%; object-fit: cover; }
         .profile-info h4 { margin: 0; color: var(--text-active); font-size: 14px; }
         .profile-info p { margin: 3px 0 0 0; font-size: 11px; color: var(--text-color); }
 
@@ -248,10 +254,7 @@
 </head>
 <body>
 
-    <!-- Arxa fonda küləklə savrulan ləçəklər -->
     <div class="petals-container" id="petalsContainer"></div>
-
-    <!-- Sidebar Overlay (Menyunu kənara toxunub bağlamaq üçün) -->
     <div class="sidebar-overlay" id="sidebarOverlay" onclick="toggleMenu()"></div>
 
     <div class="modal hidden" id="ageModal">
@@ -280,7 +283,11 @@
         <div class="modal-content">
             <h2>Qeydiyyatdan Keç</h2>
             <input type="text" id="regUser" placeholder="İstifadəçi adı seç">
-            <input type="text" id="regAvatar" placeholder="Profil şəkil linki (.webp/jpg - istəyə bağlı)">
+            <label class="file-upload-label" for="regAvatarFile">
+                📁 Qalereyadan Şəkil Seç
+                <input type="file" id="regAvatarFile" accept="image/*" style="display: none;" onchange="previewImage(event)">
+            </label>
+            <div id="avatarPreviewContainer" style="font-size: 12px; color: var(--accent-color); margin-bottom: 10px;"></div>
             <input type="password" id="regPass" placeholder="Şifrə seç">
             <button class="modal-btn" onclick="handleRegister()">Qeydiyyatı Tamamla</button>
             <div class="switch-text">Artıq hesabın var? <span onclick="switchToLogin()">Giriş et</span></div>
@@ -290,9 +297,9 @@
 
     <div class="top-navbar">
         <div class="nav-left">
-            <a href="index.html" class="header-logo-wrapper" title="Eclipstoon">
-    <img src="logo.webp" alt="Logo" style="width: 100%; height: 100%; object-fit: cover;">
-</a>
+    <a href="index.html" class="header-logo-wrapper" title="Eclipstoon">
+        <img src="logo.webp" alt="Logo" style="height: 48px; width: auto;">
+    </a>
             <a href="https://discord.gg/SENIN_LINK" target="_blank" class="social-nav-btn discord-btn" title="Discord">
                 <svg viewBox="0 0 127.14 96.36"><path d="M107.7,8.07A105.15,105.15,0,0,0,81.47,0a72.06,72.06,0,0,0-3.36,6.83A97.68,97.68,0,0,0,49,6.83,72.37,72.37,0,0,0,45.64,0,105.89,105.89,0,0,0,19.39,8.09C2.79,32.65-1.71,56.6.54,80.21h0A105.73,105.73,0,0,0,32.71,96.36,77.7,77.7,0,0,0,39.6,85.25a68.42,68.42,0,0,1-10.85-5.18c.91-.66,1.8-1.34,2.66-2a75.57,75.57,0,0,0,64.32,0c.87.71,1.76,1.39,2.66,2a68.68,68.68,0,0,1-10.87,5.19,77,77,0,0,0,6.89,11.1,105.25,105.25,0,0,0,32.19-16.14c2.65-27.28-4.52-51.1-19.45-72.15ZM42.45,65.69C36.18,65.69,31,60,31,53s5.18-12.72,11.45-12.72S53.9,46,53.85,53,48.72,65.69,42.45,65.69Zm42.24,0C78.41,65.69,73.25,60,73.25,53s5.18-12.72,11.44-12.72S96.14,46,96.1,53,91,65.69,84.69,65.69Z"/></svg>
                 <span>Discord</span>
@@ -350,7 +357,7 @@
                     Komandamıza Qoşulun
                 </a>
             </li>
-            <li>
+            <li id="authLi">
                 <a onclick="openLoginModal()" id="authMenuText">
                     <svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 3c1.66 0 3 1.34 3 3s-1.34 3-3 3-3-1.34-3-3 1.34-3 3-3zm0 14.2c-2.5 0-4.71-1.28-6-3.22.03-1.99 4-3.08 6-3.08 1.99 0 5.97 1.09 6 3.08-1.29 1.94-3.5 3.22-6 3.22z"/></svg>
                     Giriş / Qeydiyyat
@@ -384,22 +391,6 @@
                             <a href="bolum.html" class="read-btn">OXU</a>
                         </div>
                     </div>
-                    <div class="carousel-slide" style="background-image: linear-gradient(45deg, #101832, #22153a);">
-                        <div class="slide-badge ongoing">Davam Edir</div>
-                        <div class="carousel-overlay">
-                            <h2 class="slide-title">Desire me if you can</h2>
-                            <p class="slide-desc">Arzuların, şəhvətin və gözlənilməz duyğuların bir-birinə qarışdığı valehedici manhwa seriyası...</p>
-                            <a href="bolum.html" class="read-btn">OXU</a>
-                        </div>
-                    </div>
-                    <div class="carousel-slide" style="background-image: linear-gradient(45deg, #321025, #1f1032);">
-                        <div class="slide-badge ongoing">Davam Edir</div>
-                        <div class="carousel-overlay">
-                            <h2 class="slide-title">The Ghost’s Nocturne</h2>
-                            <p class="slide-desc">Köhnə əfsanələr, ruhlar və qaranlıq sirli gecələrin fonunda baş verən mistik və dramatik hadisələr...</p>
-                            <a href="bolum.html" class="read-btn">OXU</a>
-                        </div>
-                    </div>
                 </div>
             </div>
             <button class="carousel-btn prev" onclick="moveCarousel(-1)">❮</button>
@@ -415,53 +406,6 @@
             <div class="item-details">
                 <h4><a href="bolum.html" style="color:inherit; text-decoration:none;">Jinx</a></h4>
                 <p>• <a href="bolum.html" style="color:inherit; text-decoration:none;">Bölüm 20</a> — 1 gün öncə</p>
-            </div>
-        </div>
-
-        <div class="section-header">
-            <span>📖 Yeni Yüklənən Novellər</span>
-            <button onclick="alert('Hamısı')">TÜMÜNÜ GÖR</button>
-        </div>
-        <div class="item-card">
-            <div class="item-thumb" style="background: #db2777;"></div>
-            <div class="item-details">
-                <h4>Codename Anastasia - NOVEL</h4>
-                <p>• Bölüm 15 — 2 gün öncə</p>
-            </div>
-        </div>
-
-        <div class="section-header">
-            <span>🔥 Bu Həftənin Sevilənləri</span>
-        </div>
-        <div class="item-card">
-            <div class="item-thumb" style="background: #7c3aed;"></div>
-            <div class="item-details">
-                <h4><a href="bolum.html" style="color:inherit; text-decoration:none;">Desire me if you can</a></h4>
-                <p>⭐ 9.5 — Davam edir</p>
-            </div>
-        </div>
-        <div class="item-card">
-            <div class="item-thumb" style="background: #db2777;"></div>
-            <div class="item-details">
-                <h4><a href="bolum.html" style="color:inherit; text-decoration:none;">The Ghost’s Nocturne</a></h4>
-                <p>⭐ 9.5 — Davam edir</p>
-            </div>
-        </div>
-
-        <div class="section-header" style="margin-bottom: 10px;">
-            <span>⭐ Ən Çox Bəyənilənlər</span>
-        </div>
-        <div class="filter-tabs">
-            <button class="tab-btn active" onclick="setTab(this)">Həftəlik</button>
-            <button class="tab-btn" onclick="setTab(this)">Aylıq</button>
-            <button class="tab-btn" onclick="setTab(this)">İllik</button>
-        </div>
-        <div class="item-card">
-            <div class="item-thumb" style="background: #8b5cf6;"></div>
-            <div class="item-details">
-                <h4 style="color: var(--accent-color);">#1 Jinx</h4>
-                <p>Janrlar: BL, Drama, Romantik, İdman</p>
-                <p>⭐ 9.8</p>
             </div>
         </div>
     </div>
@@ -523,11 +467,6 @@
         }
         setInterval(() => { moveCarousel(1); }, 5000);
 
-        function setTab(btn) {
-            document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
-            btn.classList.add('active');
-        }
-
         function openLoginModal() {
             toggleMenu();
             document.getElementById('loginModal').classList.remove('hidden');
@@ -545,22 +484,56 @@
             document.getElementById('loginModal').classList.add('hidden');
         }
 
+        let tempAvatarBase64 = "";
+
+        function previewImage(event) {
+            const file = event.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    tempAvatarBase64 = e.target.result;
+                    document.getElementById('avatarPreviewContainer').innerText = "✅ Şəkil seçildi!";
+                }
+                reader.readAsDataURL(file);
+            }
+        }
+
+        // Çoxlu istifadəçiləri yadda saxlamaq üçün sistem
         function handleRegister() {
-            let user = document.getElementById('regUser').value;
-            let pass = document.getElementById('regPass').value;
-            let avatar = document.getElementById('regAvatar').value;
-            if(!user || !pass) { alert("Bütün xanaları doldurun!"); return; }
-            localStorage.setItem('eclipstoon_user', user);
-            localStorage.setItem('eclipstoon_pass', pass);
-            if(avatar) localStorage.setItem('eclipstoon_avatar', avatar);
-            alert("Qeydiyyat uğurla tamamlandı!");
+            let user = document.getElementById('regUser').value.trim();
+            let pass = document.getElementById('regPass').value.trim();
+            
+            if(!user || !pass) { alert("İstifadəçi adı və şifrə mütləq doldurulmalıdır!"); return; }
+            
+            let users = JSON.parse(localStorage.getItem('eclipstoon_users') || "[]");
+            
+            if(users.some(u => u.username === user)) {
+                alert("Bu istifadəçi adı artıq mövcuddur!");
+                return;
+            }
+
+            users.push({
+                username: user,
+                password: pass,
+                avatar: tempAvatarBase64 || ""
+            });
+
+            localStorage.setItem('eclipstoon_users', JSON.stringify(users));
+            alert("Qeydiyyat uğurla tamamlandı! İndi daxil ola bilərsiniz.");
+            tempAvatarBase64 = "";
+            document.getElementById('avatarPreviewContainer').innerText = "";
             switchToLogin();
         }
 
         function handleLogin() {
-            let user = document.getElementById('loginUser').value;
-            let pass = document.getElementById('loginPass').value;
-            if(user === localStorage.getItem('eclipstoon_user') && pass === localStorage.getItem('eclipstoon_pass')) {
+            let user = document.getElementById('loginUser').value.trim();
+            let pass = document.getElementById('loginPass').value.trim();
+            
+            let users = JSON.parse(localStorage.getItem('eclipstoon_users') || "[]");
+            let foundUser = users.find(u => u.username === user && u.password === pass);
+
+            if(foundUser) {
+                localStorage.setItem('eclipstoon_logged_in', JSON.stringify(foundUser));
                 alert("Uğurla daxil oldunuz!");
                 closeModals();
                 checkLoginState();
@@ -569,20 +542,32 @@
             }
         }
 
+        function handleLogout() {
+            localStorage.removeItem('eclipstoon_logged_in');
+            checkLoginState();
+            alert("Hesabdan çıxış edildi.");
+        }
+
         function checkLoginState() {
-            let savedUser = localStorage.getItem('eclipstoon_user');
-            let savedAvatar = localStorage.getItem('eclipstoon_avatar');
-            if(savedUser) {
-                document.getElementById('sidebarUserName').innerText = savedUser;
+            let loggedUser = JSON.parse(localStorage.getItem('eclipstoon_logged_in'));
+            if(loggedUser) {
+                document.getElementById('sidebarUserName').innerText = loggedUser.username;
                 document.getElementById('authMenuText').innerHTML = `
                     <svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 3c1.66 0 3 1.34 3 3s-1.34 3-3 3-3-1.34-3-3 1.34-3 3-3zm0 14.2c-2.5 0-4.71-1.28-6-3.22.03-1.99 4-3.08 6-3.08 1.99 0 5.97 1.09 6 3.08-1.29 1.94-3.5 3.22-6 3.22z"/></svg>
-                    Hesab (${savedUser})
+                    Hesab (${loggedUser.username}) <span onclick="handleLogout()" style="color:#ef4444; margin-left:auto; font-size:11px;">[Çıxış]</span>
                 `;
-                if(savedAvatar) {
-                    document.getElementById('sidebarAvatar').innerHTML = `<img src="${savedAvatar}" style="width: 100%; height: 100%; border-radius: 50%; object-fit: cover;">`;
+                if(loggedUser.avatar) {
+                    document.getElementById('sidebarAvatar').innerHTML = `<img src="${loggedUser.avatar}">`;
                 } else {
-                    document.getElementById('sidebarAvatar').innerText = savedUser.charAt(0).toUpperCase();
+                    document.getElementById('sidebarAvatar').innerText = loggedUser.username.charAt(0).toUpperCase();
                 }
+            } else {
+                document.getElementById('sidebarUserName').innerText = "Qonaq";
+                document.getElementById('sidebarAvatar').innerText = "?";
+                document.getElementById('authMenuText').innerHTML = `
+                    <svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 3c1.66 0 3 1.34 3 3s-1.34 3-3 3-3-1.34-3-3 1.34-3 3-3zm0 14.2c-2.5 0-4.71-1.28-6-3.22.03-1.99 4-3.08 6-3.08 1.99 0 5.97 1.09 6 3.08-1.29 1.94-3.5 3.22-6 3.22z"/></svg>
+                    Giriş / Qeydiyyat
+                `;
             }
         }
 
