@@ -1,0 +1,606 @@
+<!DOCTYPE html>
+<html lang="az">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Eclipstoon</title>
+    <link rel="icon" href="logo.webp" type="image/webp">
+    <style>
+        :root {
+            --bg-color: #0c0a1d;
+            --sidebar-bg: #131026;
+            --text-color: #b4b0cd;
+            --text-active: #f3f0ff;
+            --card-bg: #181432;
+            --accent-color: #8b5cf6;
+            --accent-gradient: linear-gradient(135deg, #7c3aed, #db2777);
+        }
+
+        body.light-mode {
+            --bg-color: #f5f3ff;
+            --sidebar-bg: #ffffff;
+            --text-color: #4b5563;
+            --text-active: #4c1d95;
+            --card-bg: #ffffff;
+        }
+
+        * { box-sizing: border-box; }
+
+        body {
+            margin: 0; padding: 0;
+            background-color: var(--bg-color);
+            color: var(--text-color); font-family: Arial, sans-serif;
+            transition: background-color 0.3s ease, color 0.3s ease; width: 100%; overflow-x: hidden;
+            position: relative; min-height: 100vh;
+        }
+
+        /* Hərəkətli Lotus Ləçəkləri Arxa Fon Effekti */
+        .petals-container {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            pointer-events: none; overflow: hidden; z-index: 1;
+        }
+        .petal {
+            position: absolute; background: linear-gradient(135deg, #f472b6, #db2777);
+            border-radius: 150% 0 150% 0; opacity: 0.5; animation: fall linear infinite;
+        }
+        @keyframes fall {
+            0% { transform: translateY(-10vh) translateX(0) rotate(0deg); opacity: 0; }
+            20% { opacity: 0.7; }
+            100% { transform: translateY(110vh) translateX(100px) rotate(360deg); opacity: 0; }
+        }
+
+        .modal, .top-navbar, .sub-navbar, .sidebar, .main-content, .back-to-top, .sidebar-overlay { position: relative; z-index: 2; }
+
+        /* Sidebar Overlay (Kənara toxunduqda bağlanması üçün) */
+        .sidebar-overlay {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.5); visibility: hidden; opacity: 0; transition: 0.3s; z-index: 999;
+        }
+        .sidebar-overlay.active { visibility: visible; opacity: 1; }
+
+        .modal {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0, 0, 0, 0.85); display: flex; justify-content: center; align-items: center; z-index: 9999; padding: 15px;
+        }
+        .hidden { display: none !important; }
+
+        .modal-content {
+            background: var(--card-bg); padding: 25px; border-radius: 16px; text-align: center; max-width: 400px; width: 100%;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5); border: 1px solid rgba(139, 92, 246, 0.2);
+        }
+        .modal-content h2 { color: var(--text-active); margin-top: 0; }
+        .modal-content input {
+            width: 100%; padding: 10px; margin: 10px 0; background: rgba(255,255,255,0.04);
+            border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; color: var(--text-active); outline: none;
+        }
+        .modal-btn {
+            width: 100%; padding: 10px; border: none; border-radius: 8px; font-weight: bold; cursor: pointer;
+            background: var(--accent-gradient); color: white; margin-top: 10px; transition: opacity 0.2s;
+        }
+        .modal-btn:hover { opacity: 0.9; }
+        .switch-text { margin-top: 15px; font-size: 13px; color: var(--text-color); }
+        .switch-text span { color: var(--accent-color); cursor: pointer; font-weight: bold; }
+        .age-btn-group { display: flex; gap: 10px; justify-content: center; margin-top: 20px; flex-wrap: wrap; }
+        .age-btn { padding: 10px 20px; border: none; border-radius: 8px; font-weight: bold; cursor: pointer; flex: 1; }
+        .btn-yes { background: var(--accent-gradient); color: white; }
+        .btn-no { background-color: #ef4444; color: white; }
+
+        .top-navbar {
+            display: flex; justify-content: space-between; align-items: center; padding: 10px 15px;
+            background-color: var(--sidebar-bg); box-shadow: 0 4px 20px rgba(0,0,0,0.3); position: sticky; top: 0; z-index: 999;
+            width: 100%; border-bottom: 1px solid rgba(139, 92, 246, 0.15);
+        }
+        .nav-left, .nav-right { display: flex; align-items: center; gap: 10px; }
+        
+        /* Qrafik loqotip qutusu və daxili SVG */
+        .header-logo-wrapper {
+            width: 40px; height: 40px; border-radius: 50%; background: var(--accent-gradient);
+            display: flex; align-items: center; justify-content: center; overflow: hidden; border: 1px solid rgba(255,255,255,0.2);
+            color: white; font-weight: bold; font-size: 18px; text-decoration: none;
+        }
+        .header-logo-wrapper svg { width: 24px; height: 24px; fill: white; }
+        
+        .menu-toggle-btn { background: none; border: none; cursor: pointer; display: flex; flex-direction: column; gap: 5px; padding: 5px; }
+        .menu-toggle-btn span { width: 22px; height: 3px; background-color: var(--text-active); border-radius: 2px; transition: 0.3s; }
+
+        .sub-navbar {
+            display: flex; gap: 20px; padding: 10px 15px; background-color: rgba(19, 16, 38, 0.85);
+            border-bottom: 1px solid rgba(139, 92, 246, 0.15); overflow-x: auto;
+        }
+        .sub-navbar a { color: var(--text-active); text-decoration: none; font-weight: bold; font-size: 13px; white-space: nowrap; transition: color 0.2s; }
+        .sub-navbar a:hover, .sub-navbar a.active { color: var(--accent-color); }
+
+        .social-nav-btn {
+            display: flex; align-items: center; gap: 6px; background: rgba(255, 255, 255, 0.03); color: var(--text-active);
+            padding: 5px 8px; border-radius: 8px; text-decoration: none; font-size: 12px; font-weight: bold;
+            border: 1px solid rgba(255, 255, 255, 0.08); transition: 0.3s;
+        }
+        .social-nav-btn svg { width: 14px; height: 14px; fill: currentColor; }
+        .discord-btn:hover { background: #5865F2; border-color: #5865F2; color: white; }
+        .instagram-btn:hover { background: #E1306C; border-color: #E1306C; color: white; }
+
+        .search-container { position: relative; display: flex; align-items: center; }
+        .search-input {
+            background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.08); padding: 6px 10px 6px 28px;
+            border-radius: 20px; color: var(--text-active); outline: none; font-size: 12px; width: 110px; transition: 0.3s;
+        }
+        .search-input:focus { width: 150px; border-color: var(--accent-color); }
+        .search-icon { position: absolute; left: 9px; font-size: 11px; color: var(--text-color); }
+        
+        .theme-toggle-btn {
+            background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.08); color: var(--text-active);
+            width: 32px; height: 32px; border-radius: 50%; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 14px; transition: 0.3s;
+        }
+        .theme-toggle-btn:hover { background: var(--accent-color); border-color: var(--accent-color); }
+
+        .sidebar {
+            position: fixed; top: 0; right: -280px; width: 260px; height: 100vh; background-color: var(--sidebar-bg);
+            box-shadow: -5px 0 25px rgba(0,0,0,0.5); transition: right 0.3s ease; padding: 20px; z-index: 1000; overflow-y: auto; border-left: 1px solid rgba(139, 92, 246, 0.15);
+        }
+        .sidebar.open { right: 0; }
+        
+        .sidebar-header {
+            display: flex; justify-content: space-between; align-items: center; padding-bottom: 15px; border-bottom: 1px solid rgba(255,255,255,0.08); margin-bottom: 15px;
+        }
+        .sidebar-close-btn { background: none; border: none; color: var(--text-active); font-size: 20px; cursor: pointer; }
+
+        .profile-box {
+            display: flex; align-items: center; gap: 12px; margin-bottom: 20px;
+        }
+        .profile-avatar { width: 45px; height: 45px; border-radius: 50%; object-fit: cover; background: var(--accent-gradient); display: flex; align-items: center; justify-content: center; color: white; font-weight: bold; font-size: 18px; }
+        .profile-info h4 { margin: 0; color: var(--text-active); font-size: 14px; }
+        .profile-info p { margin: 3px 0 0 0; font-size: 11px; color: var(--text-color); }
+
+        .menu-list { list-style: none; padding: 0; margin: 0; }
+        .menu-list li { margin-bottom: 10px; }
+        .menu-list li a {
+            display: flex; align-items: center; gap: 12px; padding: 10px 14px; color: var(--text-color); text-decoration: none;
+            font-size: 13px; font-weight: 500; border-radius: 10px; transition: 0.2s; cursor: pointer; background: rgba(255,255,255,0.01); border: 1px solid rgba(255,255,255,0.03);
+        }
+        .menu-list li a:hover { background: rgba(139, 92, 246, 0.15); color: var(--accent-color); border-color: rgba(139, 92, 246, 0.3); }
+        .menu-list li a svg { width: 16px; height: 16px; fill: currentColor; flex-shrink: 0; }
+
+        .main-content { padding: 15px; max-width: 900px; margin: 0 auto; width: 100%; }
+
+        .announcement-box {
+            background-color: var(--card-bg); border-left: 4px solid var(--accent-color); padding: 12px 15px;
+            border-radius: 12px; margin-bottom: 20px; box-shadow: 0 4px 15px rgba(0,0,0,0.3); border: 1px solid rgba(139, 92, 246, 0.15);
+        }
+        .announcement-box h3 { margin: 0 0 5px 0; color: var(--text-active); font-size: 14px; }
+        .announcement-box p { margin: 0; font-size: 12px; line-height: 1.4; }
+
+        .featured-carousel-wrapper {
+            position: relative; background-color: var(--card-bg); border-radius: 16px; overflow: hidden;
+            box-shadow: 0 8px 30px rgba(0,0,0,0.5); margin-bottom: 25px; border: 1px solid rgba(139, 92, 246, 0.15); width: 100%;
+        }
+        .carousel-track-container { overflow: hidden; width: 100%; }
+        .carousel-track { display: flex; transition: transform 0.5s ease-in-out; width: 100%; }
+        .carousel-slide {
+            min-width: 100%; height: 280px; position: relative; background-size: cover; background-position: center;
+            display: flex; flex-direction: column; justify-content: flex-end;
+        }
+        @media (min-width: 600px) { .carousel-slide { height: 350px; } }
+        .carousel-overlay {
+            position: absolute; bottom: 0; left: 0; width: 100%; height: 100%;
+            background: linear-gradient(to top, rgba(12, 10, 29, 0.95) 10%, rgba(12, 10, 29, 0.5) 60%, transparent 100%);
+            display: flex; flex-direction: column; justify-content: flex-end; padding: 20px;
+        }
+        .slide-badge {
+            position: absolute; top: 14px; left: 14px; background: var(--accent-gradient); color: white;
+            padding: 4px 10px; font-size: 10px; font-weight: bold; border-radius: 6px; z-index: 3; box-shadow: 0 4px 10px rgba(124, 58, 237, 0.4);
+        }
+        .slide-title { margin: 0 0 6px 0; color: var(--text-active); font-size: 18px; font-weight: bold; }
+        @media (min-width: 600px) { .slide-title { font-size: 24px; } }
+        .slide-desc {
+            margin: 0 0 12px 0; font-size: 12px; line-height: 1.4; color: #cbd5e1;
+            display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; max-width: 600px;
+        }
+        @media (min-width: 600px) { .slide-desc { font-size: 14px; } }
+        
+        .carousel-btn {
+            position: absolute; top: 50%; transform: translateY(-50%); background: rgba(0,0,0,0.6);
+            border: 1px solid rgba(255,255,255,0.15); color: white; width: 36px; height: 36px; border-radius: 50%;
+            cursor: pointer; display: flex; align-items: center; justify-content: center; font-weight: bold; transition: 0.3s; z-index: 10;
+        }
+        .carousel-btn:hover { background: var(--accent-color); border-color: var(--accent-color); }
+        .carousel-btn.prev { left: 12px; }
+        .carousel-btn.next { right: 12px; }
+
+        .read-btn {
+            display: inline-block; background: var(--accent-gradient); color: white; padding: 7px 18px;
+            border-radius: 8px; text-decoration: none; font-weight: bold; font-size: 12px; width: fit-content;
+            box-shadow: 0 4px 12px rgba(124, 58, 237, 0.3); transition: opacity 0.2s;
+        }
+        .read-btn:hover { opacity: 0.9; }
+
+        .section-header {
+            display: flex; justify-content: space-between; align-items: center; background: var(--accent-gradient);
+            padding: 11px 16px; border-radius: 10px; margin: 25px 0 12px 0; color: white; font-weight: bold; font-size: 14px;
+            box-shadow: 0 4px 15px rgba(124, 58, 237, 0.3);
+        }
+        .section-header button { background: rgba(0,0,0,0.2); border: none; color: white; padding: 4px 9px; border-radius: 6px; font-size: 11px; cursor: pointer; }
+
+        .item-card {
+            background: var(--card-bg); padding: 10px 14px; border-radius: 12px; display: flex; gap: 14px;
+            align-items: center; margin-bottom: 10px; box-shadow: 0 4px 15px rgba(0,0,0,0.2); border: 1px solid rgba(139, 92, 246, 0.15); transition: transform 0.2s;
+        }
+        .item-card:hover { transform: translateY(-2px); }
+        .item-thumb { width: 55px; height: 75px; background: #1f1a3a; border-radius: 8px; object-fit: cover; flex-shrink: 0; }
+        .item-details h4 { margin: 0 0 4px 0; color: var(--text-active); font-size: 14px; }
+        .item-details p { margin: 2px 0; font-size: 12px; }
+
+        .filter-tabs { display: flex; gap: 6px; margin-bottom: 12px; overflow-x: auto; padding-bottom: 5px; }
+        .tab-btn {
+            background: var(--card-bg); border: 1px solid rgba(255,255,255,0.08); color: var(--text-color);
+            padding: 6px 14px; border-radius: 8px; cursor: pointer; font-size: 12px; transition: 0.3s; white-space: nowrap;
+        }
+        .tab-btn.active, .tab-btn:hover { background: var(--accent-gradient); color: white; border-color: transparent; }
+
+        .back-to-top {
+            position: fixed; bottom: 25px; right: 25px; width: 42px; height: 42px; background: var(--card-bg);
+            border: 1px solid rgba(139, 92, 246, 0.3); border-radius: 50%; display: flex; align-items: center; justify-content: center;
+            cursor: pointer; box-shadow: 0 5px 20px rgba(0,0,0,0.4); opacity: 0; visibility: hidden; transition: all 0.3s ease; z-index: 998;
+        }
+        .back-to-top.show { opacity: 1; visibility: visible; }
+        .back-to-top:hover { background: var(--accent-color); border-color: var(--accent-color); transform: translateY(-3px); }
+        .back-to-top svg { width: 20px; height: 20px; fill: var(--text-active); }
+    </style>
+</head>
+<body>
+
+    <!-- Arxa fonda küləklə savrulan ləçəklər -->
+    <div class="petals-container" id="petalsContainer"></div>
+
+    <!-- Sidebar Overlay (Menyunu kənara toxunub bağlamaq üçün) -->
+    <div class="sidebar-overlay" id="sidebarOverlay" onclick="toggleMenu()"></div>
+
+    <div class="modal hidden" id="ageModal">
+        <div class="modal-content">
+            <h2>Yaş Təsdiqi</h2>
+            <p>Bu saytda yetkinlər üçün məzmunlar yerləşir. 18 yaşından böyüksünüzmü?</p>
+            <div class="age-btn-group">
+                <button class="age-btn btn-yes" onclick="closeAgeModal()">Bəli</button>
+                <button class="age-btn btn-no" onclick="window.location.href='https://google.com'">Xeyr</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal hidden" id="loginModal">
+        <div class="modal-content">
+            <h2>Giriş Et</h2>
+            <input type="text" id="loginUser" placeholder="İstifadəçi adı">
+            <input type="password" id="loginPass" placeholder="Şifrə">
+            <button class="modal-btn" onclick="handleLogin()">Daxil Ol</button>
+            <div class="switch-text">Hesabın yoxdur? <span onclick="switchToRegister()">Qeydiyyat ol</span></div>
+            <button class="modal-btn" style="background: transparent; color: var(--text-color); margin-top: 5px; border: 1px solid rgba(255,255,255,0.1);" onclick="closeModals()">Bağla</button>
+        </div>
+    </div>
+
+    <div class="modal hidden" id="registerModal">
+        <div class="modal-content">
+            <h2>Qeydiyyatdan Keç</h2>
+            <input type="text" id="regUser" placeholder="İstifadəçi adı seç">
+            <input type="text" id="regAvatar" placeholder="Profil şəkil linki (.webp/jpg - istəyə bağlı)">
+            <input type="password" id="regPass" placeholder="Şifrə seç">
+            <button class="modal-btn" onclick="handleRegister()">Qeydiyyatı Tamamla</button>
+            <div class="switch-text">Artıq hesabın var? <span onclick="switchToLogin()">Giriş et</span></div>
+            <button class="modal-btn" style="background: transparent; color: var(--text-color); margin-top: 5px; border: 1px solid rgba(255,255,255,0.1);" onclick="closeModals()">Bağla</button>
+        </div>
+    </div>
+
+    <div class="top-navbar">
+        <div class="nav-left">
+            <a href="index.html" class="header-logo-wrapper" title="Eclipstoon">
+    <img src="logo.webp" alt="Logo" style="width: 100%; height: 100%; object-fit: cover;">
+</a>
+            <a href="https://discord.gg/SENIN_LINK" target="_blank" class="social-nav-btn discord-btn" title="Discord">
+                <svg viewBox="0 0 127.14 96.36"><path d="M107.7,8.07A105.15,105.15,0,0,0,81.47,0a72.06,72.06,0,0,0-3.36,6.83A97.68,97.68,0,0,0,49,6.83,72.37,72.37,0,0,0,45.64,0,105.89,105.89,0,0,0,19.39,8.09C2.79,32.65-1.71,56.6.54,80.21h0A105.73,105.73,0,0,0,32.71,96.36,77.7,77.7,0,0,0,39.6,85.25a68.42,68.42,0,0,1-10.85-5.18c.91-.66,1.8-1.34,2.66-2a75.57,75.57,0,0,0,64.32,0c.87.71,1.76,1.39,2.66,2a68.68,68.68,0,0,1-10.87,5.19,77,77,0,0,0,6.89,11.1,105.25,105.25,0,0,0,32.19-16.14c2.65-27.28-4.52-51.1-19.45-72.15ZM42.45,65.69C36.18,65.69,31,60,31,53s5.18-12.72,11.45-12.72S53.9,46,53.85,53,48.72,65.69,42.45,65.69Zm42.24,0C78.41,65.69,73.25,60,73.25,53s5.18-12.72,11.44-12.72S96.14,46,96.1,53,91,65.69,84.69,65.69Z"/></svg>
+                <span>Discord</span>
+            </a>
+            <a href="https://instagram.com/SENIN_LINK" target="_blank" class="social-nav-btn instagram-btn" title="Instagram">
+                <svg viewBox="0 0 24 24"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/></svg>
+                <span>Instagram</span>
+            </a>
+        </div>
+        <div class="nav-right">
+            <div class="search-container">
+                <span class="search-icon">🔍</span>
+                <input type="text" class="search-input" placeholder="Axtar...">
+            </div>
+            <button class="theme-toggle-btn" onclick="toggleTheme()" title="Rejimi dəyiş">🌙</button>
+            <button class="menu-toggle-btn" onclick="toggleMenu()" style="margin-left: 2px;">
+                <span></span><span></span><span></span>
+            </button>
+        </div>
+    </div>
+
+    <div class="sub-navbar">
+        <a href="index.html" class="active">ANA SƏHİFƏ</a>
+        <a href="seriyalar.html">SERİYALAR</a>
+    </div>
+
+    <div class="sidebar" id="sidebar">
+        <div class="sidebar-header">
+            <span style="font-weight: bold; color: var(--text-active); font-size: 14px;">Menyu</span>
+            <button class="sidebar-close-btn" onclick="toggleMenu()">✕</button>
+        </div>
+        <div class="profile-box" id="profileBox">
+            <div class="profile-avatar" id="sidebarAvatar">?</div>
+            <div class="profile-info">
+                <h4 id="sidebarUserName">Qonaq</h4>
+                <p>Eclipstoon İzləyicisi</p>
+            </div>
+        </div>
+        <ul class="menu-list">
+            <li>
+                <a href="kitabxanam.html">
+                    <svg viewBox="0 0 24 24"><path d="M4 6H2v14c0 1.1.9 2 2 2h14v-2H4V6zm16-4H8c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h12c1.1 0-2-.9-2-2V4c0-1.1-.9-2-2-2zm0 14H8V4h12v12z"/></svg>
+                    Kitabxanam (Seçilmişlər)
+                </a>
+            </li>
+            <li>
+                <a href="istəklər.html">
+                    <svg viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+                    ⭐ İstək Seriyalar
+                </a>
+            </li>
+            <li>
+                <a href="komanda.html">
+                    <svg viewBox="0 0 24 24"><path d="M16 11c1.66 0 2.99-1.34 2.99-3S17.66 5 16 5c-1.66 0-3 1.34-3 3s1.34 3 3 3zm-8 0c1.66 0 2.99-1.34 2.99-3S9.66 5 8 5C6.34 5 5 6.34 5 8s1.34 3 3 3zm0 2c-2.33 0-7 1.17-7 3.5V19h14v-2.5c0-2.33-4.67-3.5-7-3.5zm8 0c-.29 0-.62.02-.97.05 1.16.84 1.97 1.97 1.97 3.45V19h6v-2.5c0-2.33-4.67-3.5-7-3.5z"/></svg>
+                    Komandamıza Qoşulun
+                </a>
+            </li>
+            <li>
+                <a onclick="openLoginModal()" id="authMenuText">
+                    <svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 3c1.66 0 3 1.34 3 3s-1.34 3-3 3-3-1.34-3-3 1.34-3 3-3zm0 14.2c-2.5 0-4.71-1.28-6-3.22.03-1.99 4-3.08 6-3.08 1.99 0 5.97 1.09 6 3.08-1.29 1.94-3.5 3.22-6 3.22z"/></svg>
+                    Giriş / Qeydiyyat
+                </a>
+            </li>
+        </ul>
+    </div>
+
+    <div class="main-content">
+        <div class="announcement-box">
+            <h3>Elan</h3>
+            <p>Serverimizdə texniki baxış aparıldığı üçün şəkillərin yüklənməsində qısamüddətli aksaklıqlar ola bilər. Anlayışınız üçün təşəkkür edirik! 😊</p>
+        </div>
+
+        <div class="featured-carousel-wrapper">
+            <div class="carousel-track-container">
+                <div class="carousel-track" id="carouselTrack">
+                    <div class="carousel-slide" style="background-image: linear-gradient(45deg, #181432, #2d1b4e);">
+                        <div class="slide-badge ongoing">Davam Edir</div>
+                        <div class="carousel-overlay">
+                            <h2 class="slide-title">Jinx</h2>
+                            <p class="slide-desc">Peşəkar fizioterapevt Jaekyeong və müəmmalı döyüşçü Kim Dan arasında cərəyan edən ehtiraslı və gərgin hekayə...</p>
+                            <a href="bolum.html" class="read-btn">OXU</a>
+                        </div>
+                    </div>
+                    <div class="carousel-slide" style="background-image: linear-gradient(45deg, #2d1b4e, #1a103c);">
+                        <div class="slide-badge ongoing">Davam Edir</div>
+                        <div class="carousel-overlay">
+                            <h2 class="slide-title">Codename Anastasia</h2>
+                            <p class="slide-desc">Kwon Taekjoo və Sergeyevich tərəfindən idarə olunan təhlükəli beynəlxalq casusluq və sirr dolu missiya...</p>
+                            <a href="bolum.html" class="read-btn">OXU</a>
+                        </div>
+                    </div>
+                    <div class="carousel-slide" style="background-image: linear-gradient(45deg, #101832, #22153a);">
+                        <div class="slide-badge ongoing">Davam Edir</div>
+                        <div class="carousel-overlay">
+                            <h2 class="slide-title">Desire me if you can</h2>
+                            <p class="slide-desc">Arzuların, şəhvətin və gözlənilməz duyğuların bir-birinə qarışdığı valehedici manhwa seriyası...</p>
+                            <a href="bolum.html" class="read-btn">OXU</a>
+                        </div>
+                    </div>
+                    <div class="carousel-slide" style="background-image: linear-gradient(45deg, #321025, #1f1032);">
+                        <div class="slide-badge ongoing">Davam Edir</div>
+                        <div class="carousel-overlay">
+                            <h2 class="slide-title">The Ghost’s Nocturne</h2>
+                            <p class="slide-desc">Köhnə əfsanələr, ruhlar və qaranlıq sirli gecələrin fonunda baş verən mistik və dramatik hadisələr...</p>
+                            <a href="bolum.html" class="read-btn">OXU</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <button class="carousel-btn prev" onclick="moveCarousel(-1)">❮</button>
+            <button class="carousel-btn next" onclick="moveCarousel(1)">❯</button>
+        </div>
+
+        <div class="section-header">
+            <span>📚 Yeni Yüklənən Bölümlər</span>
+            <button onclick="alert('Hamısı')">TÜMÜNÜ GÖR</button>
+        </div>
+        <div class="item-card">
+            <div class="item-thumb" style="background: #8b5cf6;"></div>
+            <div class="item-details">
+                <h4><a href="bolum.html" style="color:inherit; text-decoration:none;">Jinx</a></h4>
+                <p>• <a href="bolum.html" style="color:inherit; text-decoration:none;">Bölüm 20</a> — 1 gün öncə</p>
+            </div>
+        </div>
+
+        <div class="section-header">
+            <span>📖 Yeni Yüklənən Novellər</span>
+            <button onclick="alert('Hamısı')">TÜMÜNÜ GÖR</button>
+        </div>
+        <div class="item-card">
+            <div class="item-thumb" style="background: #db2777;"></div>
+            <div class="item-details">
+                <h4>Codename Anastasia - NOVEL</h4>
+                <p>• Bölüm 15 — 2 gün öncə</p>
+            </div>
+        </div>
+
+        <div class="section-header">
+            <span>🔥 Bu Həftənin Sevilənləri</span>
+        </div>
+        <div class="item-card">
+            <div class="item-thumb" style="background: #7c3aed;"></div>
+            <div class="item-details">
+                <h4><a href="bolum.html" style="color:inherit; text-decoration:none;">Desire me if you can</a></h4>
+                <p>⭐ 9.5 — Davam edir</p>
+            </div>
+        </div>
+        <div class="item-card">
+            <div class="item-thumb" style="background: #db2777;"></div>
+            <div class="item-details">
+                <h4><a href="bolum.html" style="color:inherit; text-decoration:none;">The Ghost’s Nocturne</a></h4>
+                <p>⭐ 9.5 — Davam edir</p>
+            </div>
+        </div>
+
+        <div class="section-header" style="margin-bottom: 10px;">
+            <span>⭐ Ən Çox Bəyənilənlər</span>
+        </div>
+        <div class="filter-tabs">
+            <button class="tab-btn active" onclick="setTab(this)">Həftəlik</button>
+            <button class="tab-btn" onclick="setTab(this)">Aylıq</button>
+            <button class="tab-btn" onclick="setTab(this)">İllik</button>
+        </div>
+        <div class="item-card">
+            <div class="item-thumb" style="background: #8b5cf6;"></div>
+            <div class="item-details">
+                <h4 style="color: var(--accent-color);">#1 Jinx</h4>
+                <p>Janrlar: BL, Drama, Romantik, İdman</p>
+                <p>⭐ 9.8</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="back-to-top" id="backToTop" onclick="scrollToTop()" title="Yuxarı qayıt">
+        <svg viewBox="0 0 24 24"><path d="M7.41 15.41L12 10.83l4.59 4.58L18 14l-6-6-6 6z"/></svg>
+    </div>
+
+    <script>
+        function createPetals() {
+            const container = document.getElementById('petalsContainer');
+            const count = 15;
+            for (let i = 0; i < count; i++) {
+                const petal = document.createElement('div');
+                petal.classList.add('petal');
+                petal.style.left = Math.random() * 100 + 'vw';
+                petal.style.top = -10 + 'vh';
+                const size = Math.random() * 8 + 8;
+                petal.style.width = size + 'px';
+                petal.style.height = size * 1.5 + 'px';
+                const duration = Math.random() * 6 + 6;
+                const delay = Math.random() * 5;
+                petal.style.animationDuration = duration + 's';
+                petal.style.animationDelay = delay + 's';
+                container.appendChild(petal);
+            }
+        }
+        createPetals();
+
+        function toggleMenu() { 
+            document.getElementById('sidebar').classList.toggle('open'); 
+            document.getElementById('sidebarOverlay').classList.toggle('active');
+        }
+        
+        function toggleTheme() { 
+            document.body.classList.toggle('light-mode');
+            let btn = document.querySelector('.theme-toggle-btn');
+            btn.innerHTML = document.body.classList.contains('light-mode') ? "☀️" : "🌙";
+        }
+        
+        function checkAgeVerification() {
+            if (!localStorage.getItem('eclipstoon_age_verified')) {
+                document.getElementById('ageModal').classList.remove('hidden');
+            }
+        }
+        function closeAgeModal() { 
+            localStorage.setItem('eclipstoon_age_verified', 'true');
+            document.getElementById('ageModal').classList.add('hidden'); 
+        }
+        
+        let currentSlide = 0;
+        const track = document.getElementById('carouselTrack');
+        const slides = document.querySelectorAll('.carousel-slide');
+        
+        function updateCarousel() { track.style.transform = 'translateX(-' + (currentSlide * 100) + '%)'; }
+        function moveCarousel(direction) {
+            currentSlide = (currentSlide + direction + slides.length) % slides.length;
+            updateCarousel();
+        }
+        setInterval(() => { moveCarousel(1); }, 5000);
+
+        function setTab(btn) {
+            document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+        }
+
+        function openLoginModal() {
+            toggleMenu();
+            document.getElementById('loginModal').classList.remove('hidden');
+        }
+        function closeModals() {
+            document.getElementById('loginModal').classList.add('hidden');
+            document.getElementById('registerModal').classList.add('hidden');
+        }
+        function switchToRegister() {
+            document.getElementById('loginModal').classList.add('hidden');
+            document.getElementById('registerModal').classList.remove('hidden');
+        }
+        function switchToLogin() {
+            document.getElementById('registerModal').classList.add('hidden');
+            document.getElementById('loginModal').classList.add('hidden');
+        }
+
+        function handleRegister() {
+            let user = document.getElementById('regUser').value;
+            let pass = document.getElementById('regPass').value;
+            let avatar = document.getElementById('regAvatar').value;
+            if(!user || !pass) { alert("Bütün xanaları doldurun!"); return; }
+            localStorage.setItem('eclipstoon_user', user);
+            localStorage.setItem('eclipstoon_pass', pass);
+            if(avatar) localStorage.setItem('eclipstoon_avatar', avatar);
+            alert("Qeydiyyat uğurla tamamlandı!");
+            switchToLogin();
+        }
+
+        function handleLogin() {
+            let user = document.getElementById('loginUser').value;
+            let pass = document.getElementById('loginPass').value;
+            if(user === localStorage.getItem('eclipstoon_user') && pass === localStorage.getItem('eclipstoon_pass')) {
+                alert("Uğurla daxil oldunuz!");
+                closeModals();
+                checkLoginState();
+            } else {
+                alert("İstifadəçi adı və ya şifrə yanlışdır!");
+            }
+        }
+
+        function checkLoginState() {
+            let savedUser = localStorage.getItem('eclipstoon_user');
+            let savedAvatar = localStorage.getItem('eclipstoon_avatar');
+            if(savedUser) {
+                document.getElementById('sidebarUserName').innerText = savedUser;
+                document.getElementById('authMenuText').innerHTML = `
+                    <svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 3c1.66 0 3 1.34 3 3s-1.34 3-3 3-3-1.34-3-3 1.34-3 3-3zm0 14.2c-2.5 0-4.71-1.28-6-3.22.03-1.99 4-3.08 6-3.08 1.99 0 5.97 1.09 6 3.08-1.29 1.94-3.5 3.22-6 3.22z"/></svg>
+                    Hesab (${savedUser})
+                `;
+                if(savedAvatar) {
+                    document.getElementById('sidebarAvatar').innerHTML = `<img src="${savedAvatar}" style="width: 100%; height: 100%; border-radius: 50%; object-fit: cover;">`;
+                } else {
+                    document.getElementById('sidebarAvatar').innerText = savedUser.charAt(0).toUpperCase();
+                }
+            }
+        }
+
+        window.onscroll = function() {
+            let backToTopBtn = document.getElementById('backToTop');
+            if (document.body.scrollTop > 200 || document.documentElement.scrollTop > 200) {
+                backToTopBtn.classList.add('show');
+            } else {
+                backToTopBtn.classList.remove('show');
+            }
+        };
+
+        function scrollToTop() { window.scrollTo({ top: 0, behavior: 'smooth' }); }
+
+        window.onload = function() {
+            checkAgeVerification();
+            checkLoginState();
+        };
+    </script>
+</body>
+</html>

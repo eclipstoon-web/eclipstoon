@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="az">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Seriyalar - Eclipstoon</title>
+    <link rel="icon" href="logo.webp" type="image/webp">
+    <style>
+        :root {
+            --bg-color: #0c0a1d;
+            --sidebar-bg: #131026;
+            --text-color: #b4b0cd;
+            --text-active: #f3f0ff;
+            --card-bg: #181432;
+            --accent-color: #8b5cf6;
+            --accent-gradient: linear-gradient(135deg, #7c3aed, #db2777);
+        }
+        body {
+            margin: 0; padding: 0; background: var(--bg-color); color: var(--text-color); font-family: Arial, sans-serif;
+            position: relative; min-height: 100vh; overflow-x: hidden;
+        }
+        /* Lotos ləçəkləri animasiya effekti */
+        .petal-bg {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 0; overflow: hidden;
+        }
+        .petal {
+            position: absolute; background: radial-gradient(circle, rgba(219,39,119,0.2) 0%, rgba(124,58,237,0.05) 70%);
+            border-radius: 50% 0 50% 0; opacity: 0.6; animation: fall linear infinite;
+        }
+        @keyframes fall {
+            0% { transform: translateY(-10vh) translateX(0) rotate(0deg); opacity: 0; }
+            20% { opacity: 0.8; }
+            100% { transform: translateY(110vh) translateX(50px) rotate(360deg); opacity: 0; }
+        }
+        .top-navbar {
+            display: flex; justify-content: space-between; align-items: center; padding: 15px 25px;
+            background-color: var(--sidebar-bg); border-bottom: 1px solid rgba(139, 92, 246, 0.15);
+            position: sticky; top: 0; z-index: 999;
+        }
+        .nav-left { display: flex; align-items: center; gap: 10px; }
+        .sub-navbar {
+            display: flex; gap: 20px; padding: 10px 25px; background-color: rgba(19, 16, 38, 0.8);
+            border-bottom: 1px solid rgba(139, 92, 246, 0.1); position: relative; z-index: 10;
+        }
+        .sub-navbar a { color: var(--text-active); text-decoration: none; font-weight: bold; font-size: 13px; }
+        .sub-navbar a:hover, .sub-navbar a.active { color: var(--accent-color); }
+        .main-content { padding: 30px 20px; max-width: 900px; margin: 0 auto; position: relative; z-index: 10; }
+        h2 { color: var(--text-active); }
+        .series-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 15px; margin-top: 20px; }
+        .series-card { background: var(--card-bg); border-radius: 12px; overflow: hidden; border: 1px solid rgba(139, 92, 246, 0.1); padding: 10px; text-align: center; }
+        .series-thumb { width: 100%; height: 220px; background: #2d1b4e; border-radius: 8px; object-fit: cover; }
+        .series-card h4 { margin: 10px 0 5px 0; color: var(--text-active); font-size: 14px; }
+        .series-card a { display: inline-block; margin-top: 5px; background: var(--accent-gradient); color: white; padding: 5px 12px; border-radius: 6px; text-decoration: none; font-size: 12px; font-weight: bold; }
+    </style>
+</head>
+<body>
+    <!-- Lotos ləçəkləri fonu -->
+    <div class="petal-bg">
+        <div class="petal" style="width: 25px; height: 15px; left: 10%; animation-duration: 12s; animation-delay: 0s;"></div>
+        <div class="petal" style="width: 30px; height: 18px; left: 35%; animation-duration: 14s; animation-delay: 2s;"></div>
+        <div class="petal" style="width: 20px; height: 12px; left: 60%; animation-duration: 10s; animation-delay: 4s;"></div>
+        <div class="petal" style="width: 35px; height: 20px; left: 80%; animation-duration: 13s; animation-delay: 1s;"></div>
+    </div>
+
+    <div class="top-navbar">
+        <div class="nav-left"></div>
+    </div>
+    <div class="sub-navbar">
+        <a href="index.html">ANA SƏHİFƏ</a>
+        <a href="seriyalar.html" class="active">SERİYALAR</a>
+    </div>
+    <div class="main-content">
+        <h2>Bütün Seriyalar</h2>
+        <div class="series-grid">
+            <div class="series-card">
+                <div class="series-thumb" style="background: linear-gradient(45deg, #1f293d, #2d1b4e);"></div>
+                <h4>Jinx</h4>
+                <a href="bolum.html">Oxu</a>
+            </div>
+            <div class="series-card">
+                <div class="series-thumb" style="background: linear-gradient(45deg, #3b2d1b, #4e1b38);"></div>
+                <h4>Codename Anastasia</h4>
+                <a href="bolum.html">Oxu</a>
+            </div>
+            <div class="series-card">
+                <div class="series-thumb" style="background: linear-gradient(45deg, #1b3d36, #1b274e);"></div>
+                <h4>Desire me if you can</h4>
+                <a href="bolum.html">Oxu</a>
+            </div>
+            <div class="series-card">
+                <div class="series-thumb" style="background: linear-gradient(45deg, #2d1b1b, #1b304e);"></div>
+                <h4>The Ghost’s Nocturne</h4>
+                <a href="bolum.html">Oxu</a>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
